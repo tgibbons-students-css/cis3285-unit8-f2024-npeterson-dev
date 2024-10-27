@@ -51,9 +51,79 @@ namespace SingleResponsibilityPrinciple.Tests
         }
 
         [TestMethod()]
+        public void TestTenFile()
+        {
+            //Arrange
+            var tradeStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Unit8_SRP_F24Tests.goodtrades10.txt");
+            var tradeProcessor = new TradeProcessor();
+
+            //Act
+            int countBefore = CountDbRecords();
+            tradeProcessor.ProcessTrades(tradeStream);
+            //Assert
+            int countAfter = CountDbRecords();
+            Assert.AreEqual(countBefore + 10, countAfter);
+        }
+
+        [TestMethod()]
+        public void TestZeroFile()
+        {
+            //Arrange
+            var tradeStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Unit8_SRP_F24Tests.zerotrades.txt");
+            var tradeProcessor = new TradeProcessor();
+
+            //Act
+            int countBefore = CountDbRecords();
+            tradeProcessor.ProcessTrades(tradeStream);
+            //Assert
+            int countAfter = CountDbRecords();
+            Assert.AreEqual(countBefore, countAfter);
+        }
+
+        [TestMethod()]
+        [ExpectedException(typeof(FileNotFoundException))]
+        public void ReadTradeData_NonExistentFile_ThrowsFileNotFoundException()
+        {
+            // Arrange
+            var tradeProcessor = new TradeProcessor();
+            string nonExistentFilePath = @"C:\path\to\nonexistentfile.txt";
+
+            // Attempt to read from a non-existent file
+            using (var stream = new FileStream(nonExistentFilePath, FileMode.Open))
+            {
+                tradeProcessor.ReadTradeData(stream);
+            }
+
+            // Assert is handled by the ExpectedException attribute
+        }
+
+        [TestMethod()]
+        public void TestBadTradeFile_TooManyValues()
+        {
+            // Arrange
+            var tradeStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Unit8_SRP_F24Tests.badtrade.txt");
+            var tradeProcessor = new TradeProcessor();
+
+            // Act
+            int countBefore = CountDbRecords();
+            tradeProcessor.ProcessTrades(tradeStream);
+            int countAfter = CountDbRecords();
+
+            // Assert
+            Assert.AreEqual(countBefore, countAfter, "Trades should not be added to the database due to a bad trade format.");
+        }
+
+
+        [TestMethod()]
         public void ProcessTradesTest()
         {
             //Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void ReadTradeDataTest()
+        {
+            Assert.Fail();
         }
     }
 }
